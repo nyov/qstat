@@ -22,12 +22,19 @@
 #include "qstat.h"
 #include "packet_manip.h"
 
+#define TM_XML_PREFIX "<?xml version=\"1.0\"?>\n<methodCall>\n<methodName>system.multicall</methodName>\n<params><param><value><array><data>\n"
+#define TM_XML_SUFFIX "</data></array></value></param></params>\n</methodCall>"
+#define TM_SERVERINFO "<value><struct><member><name>methodName</name><value>GetServerOptions</value></member><member><name>params</name><value><array><data></data></array></value></member></struct></value>\n<value><struct><member><name>methodName</name><value>GetCurrentChallengeInfo</value></member><member><name>params</name><value><array><data></data></array></value></member></struct></value>\n"
+#define TM_PLAYERLIST "<value><struct><member><name>methodName</name><value>GetPlayerList</value></member><member><name>params</name><value><array><data><value><i4>100</i4></value><value><i4>0</i4></value></data></array></value></member></struct></value>\n"
+#define TM_AUTH_TEMPLATE "<value><struct>\n<member><name>methodName</name><value><string>Authenticate</string></value></member>\n<member><name>params</name><value><array><data>\n<value><string>%s</string></value>\n<value><string>%s</string></value></data></array></value></member></struct></value>\n"
 
 void send_tm_request_packet( struct qserver *server )
 {
 	char buf[2048];
 	char *xmlp = buf + 8;
 	unsigned int len;
+	char *user = get_param_value( server, "user", NULL );
+	char *password = get_param_value( server, "password", NULL );
 
 	if ( ! server->protocol_version )
 	{
@@ -37,20 +44,30 @@ void send_tm_request_packet( struct qserver *server )
 		return;
 	}
 
+	// build the query xml
+	len = sprintf( xmlp, TM_XML_PREFIX );
+
+	if ( user != NULL && password != NULL )
+	{
+		len += sprintf( xmlp + len, TM_AUTH_TEMPLATE, user, password);
+	}
+
+	len += sprintf( xmlp + len, TM_SERVERINFO );
+
 	if ( get_player_info )
 	{
 		server->flags |= TF_PLAYER_QUERY|TF_RULES_QUERY;
 		// TODO: add more calls to get full player info?
-		strcpy( xmlp, "<?xml version=\"1.0\"?>\n<methodCall>\n<methodName>system.multicall</methodName>\n<params><param><value><array><data>\n<value><struct><member><name>methodName</name><value>GetServerOptions</value></member><member><name>params</name><value><array><data></data></array></value></member></struct></value>\n<value><struct><member><name>methodName</name><value>GetCurrentChallengeInfo</value></member><member><name>params</name><value><array><data></data></array></value></member></struct></value>\n<value><struct><member><name>methodName</name><value>GetPlayerList</value></member><member><name>params</name><value><array><data><value><i4>100</i4></value><value><i4>0</i4></value></data></array></value></member></struct></value>\n</data></array></value></param></params>\n</methodCall>" );
+		len += sprintf( xmlp + len, TM_PLAYERLIST );
 	}
 	else
 	{
 		server->flags |= TF_STATUS_QUERY;
-		strcpy( xmlp, "<?xml version=\"1.0\"?>\n<methodCall>\n<methodName>system.multicall</methodName>\n<params><param><value><array><data>\n<value><struct><member><name>methodName</name><value>GetServerOptions</value></member><member><name>params</name><value><array><data></data></array></value></member></struct></value>\n<value><struct><member><name>methodName</name><value>GetCurrentChallengeInfo</value></member><member><name>params</name><value><array><data></data></array></value></member></struct></value>\n<value><struct><member><name>methodName</name><value>GetPlayerList</value></member><member><name>params</name><value><array><data><value><i4>100</i4></value><value><i4>0</i4></value></data></array></value></member></struct></value>\n</data></array></value></param></params>\n</methodCall>" );
 	}
 
+	len += sprintf( xmlp + len, TM_XML_SUFFIX );
+
 	// First 4 bytes is the length of the request
-	len = strlen( xmlp );
 	memcpy( buf, &len, 4 );
 	// Second 4 bytes is the handle identifier ( id )
 	memcpy( buf+4, &server->challenge, 4 );
