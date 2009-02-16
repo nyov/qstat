@@ -12057,19 +12057,43 @@ char *xform_name(char *string, struct qserver *server)
 				{
 					break;
 				}
-				if (html_names == 1)
+				// New DarkPlaces color codes ^xrgb (used in Nexuiz 2.5+)
+				if ( *(s+1) == 'x' && isxdigit(*(s+2)) && isxdigit(*(s+3)) && isxdigit(*(s+4)) )
 				{
-					q += sprintf(q, "%s<font color=\"%s\">", font_tag ? "</font>" : "", quake3_escape_colors[*(s + 1) &0x7]);
-					s++;
-					font_tag = 1;
-				}
-				else if (strip_carets)
-				{
-					s++;
+					if (html_names == 1)
+					{
+						q+= sprintf( q, "%s<font color=\"#%c%c%c%c%c%c\">", font_tag?"</font>":"", *(s+2), *(s+2), *(s+3), *(s+3), *(s+4), *(s+4));
+						s+=4;
+						font_tag= 1;
+					}
+					else if (strip_carets)
+					{
+						s+=4;
+					}
+					else
+					{
+						*q++ = *s; s++;
+						*q++ = *s; s++;
+						*q++ = *s; s++;
+						*q++ = *s;
+					}
 				}
 				else
 				{
-					*q++ = *s;
+					if (html_names == 1)
+					{
+						q += sprintf(q, "%s<font color=\"%s\">", font_tag ? "</font>" : "", quake3_escape_colors[*(s + 1) &0x7]);
+						s++;
+						font_tag = 1;
+					}
+					else if (strip_carets)
+					{
+						s++;
+					}
+					else
+					{
+						*q++ = *s;
+					}
 				}
 			}
 			else
