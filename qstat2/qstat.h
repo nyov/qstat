@@ -848,7 +848,7 @@ char ottd_serverdetails[] = {
 
 /* Teeworlds */
 
-char tee_serverstatus[14] = { '\x20', '\0', '\0', '\0', '\0', '\0', '\xFF', '\xFF', '\xFF', '\xFF', 'g', 'i', 'e', 'f' };
+char tee_serverstatus[15] = { '\x20', '\0', '\0', '\0', '\0', '\0', '\xFF', '\xFF', '\xFF', '\xFF', 'g', 'i', 'e', '3', '\x02' };
 
 
 /* SERVER BUILTIN TYPES */

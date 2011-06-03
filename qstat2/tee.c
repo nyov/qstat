@@ -17,7 +17,7 @@
 #include "qstat.h"
 #include "packet_manip.h"
 
-char tee_serverinfo[8] = { '\xFF', '\xFF', '\xFF', '\xFF', 'i', 'n', 'f', 'o' };
+char tee_serverinfo[9] = { '\xFF', '\xFF', '\xFF', '\xFF', 'i', 'n', 'f', '3' };
 
 query_status_t send_tee_request_packet( struct qserver *server )
 {
@@ -37,6 +37,8 @@ query_status_t deal_with_tee_packet( struct qserver *server, char *rawpkt, int p
 	if (0 == memcmp( pkt, tee_serverinfo, 8)) 
 	{
 		pkt += 8;
+		// unknown
+		pkt += strlen(pkt) + 1;
 		// version
 		version = strdup(pkt); pkt += strlen(pkt) + 1;
 		// server name
@@ -60,17 +62,27 @@ query_status_t deal_with_tee_packet( struct qserver *server, char *rawpkt, int p
 		}
 		pkt += strlen(pkt) + 1; 
 		pkt += strlen(pkt) + 1;
-		pkt += strlen(pkt) + 1;
+//		pkt += strlen(pkt) + 1;
 		// num players
 		server->num_players = atoi(pkt); pkt += strlen(pkt) + 1;
 		// max players
 		server->max_players = atoi(pkt); pkt += strlen(pkt) + 1;
+		// num clients
+		pkt += strlen(pkt) + 1;
+		// max clients
+		pkt += strlen(pkt) + 1;
 		// players
 		for(i = 0; i < server->num_players; i++)
 		{
 			player = add_player( server, i );
 			player->name = strdup(pkt); pkt += strlen(pkt) + 1;
+			// clan
+			pkt += strlen(pkt) + 1;
+			// country
+			pkt += strlen(pkt) + 1;
 			player->score = atoi(pkt); pkt += strlen(pkt) + 1;
+			// is player
+			pkt += strlen(pkt) + 1;
 		}
 		// version reprise
 		server->protocol_version = 0;
