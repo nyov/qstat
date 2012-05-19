@@ -2547,6 +2547,9 @@ void xml_display_tee_player_info(struct qserver *server)
 
 		fprintf(OF, "\t\t\t\t<name>%s</name>\n", xml_escape(xform_name(player->name, server)));
 		fprintf(OF, "\t\t\t\t<score>%d</score>\n", player->score);
+		fprintf(OF, "\t\t\t\t<clan>%s</clan>\n", player->tribe_tag);
+		if (player->type_flag == PLAYER_TYPE_BOT)
+			fprintf(OF, "\t\t\t\t<type>bot</type>\n");
 
 		fprintf(OF, "\t\t\t</player>\n");
 	}

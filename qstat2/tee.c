@@ -17,7 +17,8 @@
 #include "qstat.h"
 #include "packet_manip.h"
 
-char tee_serverinfo[8] = { '\xFF', '\xFF', '\xFF', '\xFF', 'i', 'n', 'f', 'o' };
+// see teeworlds-source/src/mastersrv/mastersrv.h
+char tee_serverinfo[8] = { '\xFF', '\xFF', '\xFF', '\xFF', 'i', 'n', 'f', '3' };
 
 query_status_t send_tee_request_packet( struct qserver *server )
 {
@@ -28,8 +29,8 @@ query_status_t deal_with_tee_packet( struct qserver *server, char *rawpkt, int p
 {
 	// skip unimplemented ack, crc, etc
 	char *pkt = rawpkt + 6;
-	char *tok = NULL, *version = NULL;
-	int i;
+	char *tok = NULL, *token = NULL, *version = NULL, *flags = NULL;
+	int i, num_clients = 0, max_clients = 0;
 	struct player* player;
 
 	server->ping_total += time_delta(&packet_recv_time, &server->packet_time1);
@@ -37,6 +38,8 @@ query_status_t deal_with_tee_packet( struct qserver *server, char *rawpkt, int p
 	if (0 == memcmp( pkt, tee_serverinfo, 8)) 
 	{
 		pkt += 8;
+		// token
+		token = strdup(pkt); pkt += strlen(pkt) + 1;
 		// version
 		version = strdup(pkt); pkt += strlen(pkt) + 1;
 		// server name
@@ -44,45 +47,36 @@ query_status_t deal_with_tee_packet( struct qserver *server, char *rawpkt, int p
 		// map name
 		server->map_name = strdup(pkt); pkt += strlen(pkt) + 1;
 		// game type
-		switch(atoi(pkt)) {
-		case 0:
-			add_rule( server, server->type->game_rule, "dm", NO_FLAGS);
-			break;
-		case 1:
-			add_rule( server, server->type->game_rule, "tdm", NO_FLAGS);
-			break;
-		case 2:
-			add_rule( server, server->type->game_rule, "ctf", NO_FLAGS);
-			break;
-		default:
-			add_rule( server, server->type->game_rule, "unknown", NO_FLAGS);
-			break;
-		}
+		add_rule( server, server->type->game_rule, strdup(pkt), NO_FLAGS );
 		pkt += strlen(pkt) + 1; 
-		pkt += strlen(pkt) + 1;
-		pkt += strlen(pkt) + 1;
+		// flags
+		flags = strdup(pkt); pkt += strlen(pkt) + 1; // ignore
 		// num players
 		server->num_players = atoi(pkt); pkt += strlen(pkt) + 1;
 		// max players
 		server->max_players = atoi(pkt); pkt += strlen(pkt) + 1;
+		// num clients
+		num_clients = atoi(pkt); pkt += strlen(pkt) + 1;
+		// max clients
+		server->max_spectators = atoi(pkt); pkt += strlen(pkt) + 1;
+		server->num_spectators = num_clients - server->num_players;
+		server->num_players = num_clients; // OK???
 		// players
-		for(i = 0; i < server->num_players; i++)
+		for(i = 0; i < num_clients; i++)
 		{
+			char *clan = NULL, *country = NULL;
+			int isplayer = 0;
 			player = add_player( server, i );
 			player->name = strdup(pkt); pkt += strlen(pkt) + 1;
+			clan = strdup(pkt); pkt += strlen(pkt) + 1;
+			player->tribe_tag = clan;
+			country = strdup(pkt); pkt += strlen(pkt) + 1; // ignore
 			player->score = atoi(pkt); pkt += strlen(pkt) + 1;
+			isplayer = atoi(pkt); pkt += strlen(pkt) + 1;
+			player->type_flag = isplayer ? PLAYER_TYPE_NORMAL : PLAYER_TYPE_BOT;
 		}
 		// version reprise
-		server->protocol_version = 0;
-
-		if (NULL == (tok = strtok(version, "."))) return -1;
-		server->protocol_version |= (atoi(tok) & 0x000F) << 12;
-		if (NULL == (tok = strtok(NULL, "."))) return -1;
-		server->protocol_version |= (atoi(tok) & 0x000F) << 8;
-		if (NULL == (tok = strtok(NULL, "."))) return -1;
-		server->protocol_version |= (atoi(tok) & 0x00FF);
-
-		free(version);
+		server->protocol_version = 0; // TODO
 
 		return DONE_FORCE;
 	}

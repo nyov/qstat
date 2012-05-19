@@ -858,7 +858,8 @@ char ottd_serverdetails[] = {
 
 /* Teeworlds */
 
-char tee_serverstatus[14] = { '\x20', '\0', '\0', '\0', '\0', '\0', '\xFF', '\xFF', '\xFF', '\xFF', 'g', 'i', 'e', 'f' };
+// see teeworlds-source/scripts/tw_api.py
+char tee_serverstatus[15] = { '\xFF', '\xFF', '\xFF', '\xFF', '\xFF', '\xFF', '\xFF', '\xFF', '\xFF', '\xFF', 'g', 'i', 'e', '3', '\x00' };
 
 /* Cube2 */
 
@@ -3063,7 +3064,7 @@ server_type builtin_types[] = {
     "-tee",							/* type_option */
     "Teeworlds",		/* game_name */
     0,								/* master */
-    35515,							/* default_port */
+    8303,							/* default_port */
     0,								/* port_offset */
     0,				/* flags */
     "gametype",							/* game_rule */
