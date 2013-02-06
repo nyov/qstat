@@ -3,13 +3,36 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title>QStat Downloads</title>
-<!--#include virtual="/inc/header.html" -->
+<!-- include virtual="/inc/header.html" -->
+<link href="../css/global.css" rel="stylesheet" type="text/css" />
+<head profile="http://www.w3.org/2005/11/profile">
+<link rel="icon" 
+      type="image/png" 
+      href="../images/favicon.png">
+<!-- /include virtual="/inc/header.html" -->
 </head>
 
 <body>
 <div id="container">
 <div class="leftblock">
-<!--#include virtual="/inc/nav.html" -->
+<!-- include virtual="/inc/nav.html" -->
+  <p><a href="../index.shtml"><img src="../images/logo1.png" alt="QSTAT" width="120" height="135" class="qstatlogo" /></a>
+  <a href="../downloads/" class="latestdownload">DOWNLOAD QSTAT</a>
+<ul id="nav1">
+    <li><a href="http://sourceforge.net/project/shownotes.php?group_id=56603&release_id=460941">Release Notes</a></li>
+  <li><a href="#">Documentation</a></li>
+  <li class="spacer"></li>
+    <li><a href="../mailinglists/">Mailing Lists</a> </li>
+  <li class="spacer"></li>
+<!--        <li><a href="#">CGI Scripts</a></li> -->
+<!--        <li><a href="#">Derived Works</a></li> -->
+    <li><a href="../">Overview</a> </li>
+    <li><a href="../faq/">FAQ</a></li>
+<!--      <li><a href="#">Information</a></li> -->
+<!--    <li><a href="#">Network Protocol</a></li> -->
+<!--    <li><a href="#">Server Pages</a></li> -->
+</ul>
+<!-- /include virtual="/inc/nav.html" -->
 </div>
 <div class="rightblock">
   <h1 align="right">QStat Downloads</h1>
