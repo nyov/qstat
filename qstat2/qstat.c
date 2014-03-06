@@ -5040,8 +5040,8 @@ int bind_sockets()
 				);
 
 				gettimeofday(&t_lastsend, NULL);
-				debug(2, "calling status_query_func for %p - connect", server);
-				process_func_ret( server, server->type->status_query_func(server) );
+				debug(2, "calling query_status_func for %p - connect", server);
+				process_func_ret( server, server->type->query_status_func(server) );
 
 				connected++;
 				if (!waiting_for_masters)
@@ -5091,8 +5091,8 @@ int bind_sockets()
 				case 0:
 					// Connected
 					gettimeofday(&t_lastsend, NULL);
-					debug(2, "calling status_query_func for %p - in progress", server);
-					process_func_ret( server, server->type->status_query_func(server) );
+					debug(2, "calling query_status_func for %p - in progress", server);
+					process_func_ret( server, server->type->query_status_func(server) );
 
 					// NOTE: connected is already incremented
 					if (!waiting_for_masters)
@@ -5223,8 +5223,8 @@ void send_packets()
 			if ( qserver_get_timeout(server, &now) <= 0 && ! ( server->type->flags & TF_TCP_CONNECT ) )
 			{
 				// Query status
-				debug(2, "calling status_query_func for %p", server);
-				process_func_ret( server, server->type->status_query_func(server) );
+				debug(2, "calling query_status_func for %p", server);
+				process_func_ret( server, server->type->query_status_func(server) );
 				gettimeofday(&t_lastsend, NULL);
 				n_sent++;
 				continue;
@@ -6011,9 +6011,9 @@ query_status_t send_rule_request_packet(struct qserver *server)
 		}
 	}
 
-	if (server->type->rule_query_func && server->type->rule_query_func != send_rule_request_packet)
+	if (server->type->query_rule_func && server->type->query_rule_func != send_rule_request_packet)
 	{
-		return server->type->rule_query_func(server);
+		return server->type->query_rule_func(server);
 	}
 
 	if (server->type->id == Q_SERVER)
@@ -6072,9 +6072,9 @@ query_status_t send_player_request_packet(struct qserver *server)
 		}
 	}
 
-	if (server->type->player_query_func && server->type->player_query_func != send_player_request_packet)
+	if (server->type->query_player_func && server->type->query_player_func != send_player_request_packet)
 	{
-		return server->type->player_query_func(server);
+		return server->type->query_player_func(server);
 	}
 
 	if (!server->type->player_packet)
